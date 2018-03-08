@@ -1,31 +1,60 @@
 <?php
+
+// Start the session
+session_start();
+?>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Mini-chat</title>
+        <link rel="stylesheet" href="chat-style.css">
+    </head>
+    <style>
+    form
+    {
+        text-align:center;
+    }
+
+    </style>
+    <body>
+
+      <h2>Bienvenue! taper un message pour commencer votre Minichat session</h2>
+      <div class="container">
+
+        <form action="minichat_post.php" method="post">
+          <p>
+            <label for="message">Message</label> :  <input type="text" name="message" placeholder="tapez votre message ici" id="message" /><br />
+            <input type="submit" value="Envoyer" />
+
+	       </p>
+        </form>
+
+      </div>
+
+<?php
+// Connexion à la base de données
 try
 {
-  // On se connecte à MySQL
-    $bdd=new PDO('mysql:host=localhost;dbname=imbd;charset=utf8','root','root');
+	$bdd = new PDO('mysql:host=localhost;dbname=todolist;charset=utf8', 'root', 'root');
 }
 catch(Exception $e)
 {
-
-	// En cas d'erreur, on affiche un message et on arrête tout
-        die($e->getMessage());
+        die('Erreur : '.$e->getMessage());
 }
 
+// Récupération des 10 derniers messages
+$reponse = $bdd->query('SELECT login, message FROM minichat ORDER BY ID DESC LIMIT 0, 10');
 
- $req = $bdd->query('SELECT * FROM authors LEFT JOIN movies ON authors.id = movies.id_author');
- $req= $bdd->query('SELECT * FROM authors
-                     LEFT JOIN movies
-                     ON authors.id=movies.id_author
-                     where movies.id_author is null
-                     UNION ALL
-                     SELECT * FROM authors
-                     RIGHT JOIN movies
-                     on authors.id=movies.id_author
-                     where authors.id is Null');
+// Affichage de chaque message (toutes les données sont protégées par htmlspecialchars)
+while ($donnees = $reponse->fetch())
+{
+	echo '<p><strong>' . htmlspecialchars($donnees['login']) . '</strong> : ' . htmlspecialchars($donnees['message']) . '</p>';
+}
 
-$tab=$req->fetchAll(PDO::FETCH_ASSOC);
-echo "<pre>";
-print_r ($tab);
-echo "</pre>";
+$reponse->closeCursor();
 
 ?>
+    </body>
+</html>
