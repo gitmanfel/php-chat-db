@@ -37,20 +37,20 @@ session_start();
 // Connexion à la base de données
 try
 {
-	$bdd = new PDO('mysql:host=localhost;dbname=todolist;charset=utf8', 'root', 'root');
+	$bdd = new PDO('mysql:host=localhost;dbname=minichat;charset=utf8', 'root', 'root');
 }
 catch(Exception $e)
 {
+
         die('Erreur : '.$e->getMessage());
 }
 
 // Récupération des 10 derniers messages
-$reponse = $bdd->query('SELECT login, message FROM minichat ORDER BY ID DESC LIMIT 0, 10');
-
+$reponse = $bdd->query('SELECT * FROM message');
 // Affichage de chaque message (toutes les données sont protégées par htmlspecialchars)
 while ($donnees = $reponse->fetch())
 {
-	echo '<p><strong>' . htmlspecialchars($donnees['login']) . '</strong> : ' . htmlspecialchars($donnees['message']) . '</p>';
+	echo '<p><strong>' . $donnees['login'] . '</strong> : ' . $donnees['text'] . '</p>';
 }
 
 $reponse->closeCursor();

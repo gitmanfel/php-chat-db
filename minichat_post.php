@@ -1,8 +1,9 @@
 <?php
 // connexion a la base de données
+session_start();
 try
 {
-	$bdd = new PDO('mysql:host=localhost;dbname=mysqltod_todolist;charset=utf8', 'mysqltod_user', 'Reagan1210#');
+	$bdd = new PDO('mysql:host=localhost;dbname=minichat;charset=utf8', 'root', 'root');
 }
 catch(Exception $e)
 {
@@ -10,9 +11,9 @@ catch(Exception $e)
 }
 
 // Insertion du message à l'aide d'une requête préparée
-$req = $bdd->prepare('INSERT INTO minichat (pseudo, message) VALUES(?, ?)');
-$req->execute(array($_POST['pseudo'], $_POST['message']));
+$req = $bdd->prepare('INSERT INTO `message`(`user-id`, `login`, `text`) VALUES (?,?,?)');
+$req->execute(array($_SESSION['user-id'], $_SESSION['login'], $_POST['message']));
 
 // Puis rediriger vers minichat.php comme ceci :
-header('Location: minichat.php');
+header('Location: index.php');
 ?>

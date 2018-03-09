@@ -9,7 +9,7 @@ try
 }
 catch(Exception $e)
 {
-	echo "TEST";
+
 	// En cas d'erreur, on affiche un message et on arrête tout
 	die($e->getMessage());
 }
@@ -37,7 +37,7 @@ if(isset($_POST["connexion"]))
 			// on enregistre les paramètres de notre visiteur comme variables de session ($login et $pwd)
 			$_SESSION['login'] = $_POST['login'];
 			$_SESSION['password'] = $_POST['password'];
-
+      $_SESSION['user-id'] = $tab[0]['id'];
 
 			// on redirige notre visiteur vers une page de  chat
 			header ('location: index.php');
@@ -77,23 +77,8 @@ if(isset($_POST["Register"]))
 		// $sql = "SELECT e-mail FROM user WHERE e-mail = '".$_POST["e-mail"]."' ";
 		// $sql = mysql_query($sql);
 
-		// decompte du nombre de lettres chiffres valeurs...
-		// $sql = mysql_num_rows($sql);
-		// if($sql == 0){
-		// 	// non exces de 60 caracteres du mdp
-		// 	if(strlen($_POST["passord"] < 60))
-		// 	{
-		// 		// non exces de 30 caractere du pseudo
-		// 		if(strlen($_POST["login"] < 60))
-		// 		{
-		// 			// Si le nom de compte et le mot de passe sont différent :
-		// 			if($_POST["login"] != $_POST["password"])
-					// {
-						// tout les criteres sont remplis : inscription dans la database
-						// $sql = "INSERT INTO user (login,password,e-mail) VALUES ('".$_POST["login"]."','".$_POST["password"]."','".$_POST["e-mail"]."')";
-						// $sql="INSERT INTO `user`( `login`, `e-mail`, `password`) VALUES (".$_POST['login'].",".$_POST['e-mail'].",".$_POST['password'].")";
-						// $sql = mysql_query($sql);
 
+				// tout les criteres sont remplis : inscription dans la database
 						$request = $bdd->prepare('INSERT INTO `user`(`login`, `e-mail`, `password`) VALUES (:login,:email,:password)');
 						$request->execute(array(
 							'login' => $_POST['login'],
