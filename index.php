@@ -1,60 +1,154 @@
 <?php
+// on la démarre :)
+session_start ();
 
-// Start the session
-session_start();
-?>
-
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <title>Mini-chat</title>
-        <link rel="stylesheet" href="chat-style.css">
-    </head>
-    <style>
-    form
-    {
-        text-align:center;
-    }
-
-    </style>
-    <body>
-
-      <h2>Bienvenue! taper un message pour commencer votre Minichat session</h2>
-      <div class="container">
-
-        <form action="minichat_post.php" method="post">
-          <p>
-            <label for="message">Message</label> :  <input type="text" name="message" placeholder="tapez votre message ici" id="message" /><br />
-            <input type="submit" value="Envoyer" />
-
-	       </p>
-        </form>
-
-      </div>
-
-<?php
-// Connexion à la base de données
 try
 {
-	$bdd = new PDO('mysql:host=localhost;dbname=minichat;charset=utf8', 'root', 'root');
+	// On se connecte à MySQL
+	$bdd=new PDO('mysql:host=localhost;dbname=id5039247_minichat;charset=utf8','id5039247_manzi	','root1210');
 }
 catch(Exception $e)
 {
 
-        die('Erreur : '.$e->getMessage());
+	// En cas d'erreur, on affiche un message et on arrête tout
+	die($e->getMessage());
 }
 
-// Récupération des 10 derniers messages
-$reponse = $bdd->query('SELECT * FROM message');
-// Affichage de chaque message (toutes les données sont protégées par htmlspecialchars)
-while ($donnees = $reponse->fetch())
+if(isset($_POST["connexion"]))
 {
-	echo '<p><strong>' . $donnees['login'] . '</strong> : ' . $donnees['text'] . '</p>';
+
+	// on teste si nos variables sont définies
+	if (!empty($_POST['login']) && !empty($_POST['password']))
+	{
+
+		$request = $bdd->prepare('SELECT * from user where `login` = :login and `password` = :password');
+		$request->execute(array(
+			'login' => $_POST['login'],
+			'password' => $_POST['password']
+		));
+		$tab = $request->fetchAll();
+
+		// on vérifie les informations du formulaire, à savoir si le pseudo saisi est bien un pseudo autorisé, de même pour le mot de passe
+		if (count($tab) == 1)
+		{
+			// dans ce cas, tout est ok, on peut démarrer notre session
+
+
+			// on enregistre les paramètres de notre visiteur comme variables de session ($login et $pwd)
+			$_SESSION['login'] = $_POST['login'];
+			$_SESSION['password'] = $_POST['password'];
+      $_SESSION['user-id'] = $tab[0]['id'];
+
+			// on redirige notre visiteur vers une page de  chat
+			header ('location: minichat.php');
+
+
+		}
+
+		//Le visiteur n'a pas été reconnu comme étant membre de notre site.
+		else
+		{
+			echo '<label class="lbl-red"> <strong>Wrong username or password </strong></label>';
+		}
+	}
 }
+$error = FALSE;
+$Register = FALSE;
+//verification du passage par l inscription
+if(isset($_POST["Register"]))
+{
+	//Verification champs completements remplis ou message d'erreur.
+	if($_POST["login"] == "" OR $_POST["password"] == "" OR $_POST["password2"] == ""  OR $_POST["e-mail"] == "")
+	{
+		// On active la variable $error; le navigateur saura qu'il y'a une erreur à afficher.
+		$error = TRUE;
+		// message d erruer qu s'affichera
+		$errorMSG = "Tout les champs doivent être remplis !";
 
-$reponse->closeCursor();
+	}
+						// corespondance des 2 mdp
+	elseif($_POST["password"] == $_POST["password2"])
+	{
 
-?>
-    </body>
-</html>
+		// verification base de donnée si le pseudo n'est pas deja pris
+		// $sql = "SELECT login FROM user WHERE login = '".$_POST["login"]."' ";
+		// $sql = mysql_query($sql);
+		// //verfication email non pris
+		// $sql = "SELECT e-mail FROM user WHERE e-mail = '".$_POST["e-mail"]."' ";
+		// $sql = mysql_query($sql);
+
+
+				// tout les criteres sont remplis : inscription dans la database
+						$request = $bdd->prepare('INSERT INTO `user`(`login`, `e-mail`, `password`) VALUES (:login,:email,:password)');
+						$request->execute(array(
+							'login' => $_POST['login'],
+							'email' => $_POST['e-mail'],
+							'password' => $_POST['password']
+						));
+						//$tab = $request->fletchAll();
+
+
+
+
+
+						if($sql)
+						{
+
+							// activation de la variable $Register
+							$Register = TRUE;
+							$registerMSG = "L'Inscription est réussie ! Vous êtes maintenant membre du site.";
+
+							// stockage des mdp et pseudos
+							$_SESSION["login"] = $_POST["login"];
+							$_SESSION["password"] = $_POST["password"];
+							$_SESSION["e-mail"] = $_POST["e-mail"];
+
+				// 		}
+				// 	}
+				// }
+			// }
+		}
+	}
+}
+			?>
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Formulaire de Connexion</title>
+				<link rel="stylesheet" href="login-style.css">
+			</head>
+			<style>
+			body
+			{
+				text-align:center;
+			}
+
+		</style>
+
+		<body>
+
+			<h1>Please login!</h1>
+
+			<form action="index.php" method="post">
+				Votre login : <input type="text" name="login">
+				<br />
+				Votre mot de passé : <input type="password" name="password"><br />
+				<input type="submit" class="btn btn-primary btn-block btn-large" name="connexion" value="Connexion">
+
+			</form>
+
+			<h1>Please sign up</h1>
+
+			<form action="index.php" method="post">
+				Créer votre login : <input type="text" name="login">
+				<br />
+				Créer votre mot de passé : <input type="password" name="password"><br />
+				Confirmer votre mot de passe:<input type="password" name="password2" id="password2"/>
+				Créer votre mot e-mail : <input type="e-mail" name="e-mail"><br />
+				<input type="submit" class="btn btn-primary btn-block btn-large" name="Register" value="Register"/>
+
+
+			</form>
+
+		</body>
+		</html>
